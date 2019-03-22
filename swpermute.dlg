@@ -1,0 +1,400 @@
+/*
+  swpermute
+
+*! VERSION 0.1  16Feb2017
+
+swtpermute.dlg
+for swtpermute.ado
+with helpfile swtpermute.hlp
+Author: Jennifer Thompson
+To install  in User Statistics menue via STATA commends:
+
+
+window menu append submenu "stUser" "&Cluster RCTs"
+window menu append item "Cluster RCTs" "Permute for stepped wedge trials (&swpermute)" "db swpermute"
+window menu refresh
+
+
+To permanently install place these commands in your profile.do file
+
+
+*/
+
+VERSION 14.0
+
+OK ok1,      label("OK") 
+CANCEL can1, label("Cancel")
+SUBMIT sub1, label("Submit")  
+HELP hlp1,   view("help swpermute")
+RESET res1
+COPY copy1
+
+POSITION . . 500 340
+
+
+DIALOG main, label("swpermute- permutation tests for stepped-wedge trials") tabtitle("Main")
+BEGIN
+
+		
+  TEXT  tx_cmd  10		10		200     .,			/*
+		*/ label("Stata command to run:")			/*
+		*/
+		
+  EDIT  ed_cmd	@		30 		480		.,			///
+	label(cmd)					///
+	option(cmd)
+
+  TEXT  tx_stat @		60   	200     .,			/*
+		*/ label("Statistical expression:")			/*
+		*/
+		
+  EDIT  ed_stat	@		80 		480	.,			///
+	label(stat)					///
+	option(statistic)
+
+	
+		GROUPBOX designbox 10 110 480 120, label("Permutations")
+	
+  TEXT   	tx_clusvar  20		130   	120     .,			/*
+		*/ label("Cluster")			/*
+		*/
+  VARNAME  	vn_clusvar 	@    	150   	@     .,			/*
+		*/ label("Cluster")	option("cluster")	/*
+		*/
+		
+  TEXT   	tx_pervar  180		130   	@     .,			/*
+		*/ label("Period")			/*
+		*/
+  VARNAME  	vn_pervar 	@    	150		@     .,			/*
+		*/ label("Period")	option("period")	/*
+		*/
+		
+  TEXT   	tx_intvar  	340		130   	@     .,			/*
+		*/ label("Intervention")			/*
+		*/
+  VARNAME  	vn_intvar 	@    	150		@     .,			/*
+		*/ label("Intervention")	option("intervention")	/*
+		*/
+
+		
+  SPINNER  sp_reps  	20   	190		60       .,			/*
+		*/ label("reps")			/*
+		*/ min(1)						/*
+		*/ max(1000000)						/*
+		*/ default(500)						/*
+		*/ option("reps")					
+
+  TEXT   	tx_reps  	90		@   	60     .,			/*
+		*/ label("Replications")			/*
+		*/
+		
+		GROUPBOX pbox 10 240 480 60, label("Direction of comparison")
+
+  RADIO    	rb_ptwo   	20  	260  	100  	.,			/*
+		*/ first /*
+		*/ label("Two sided") /*
+		*/ option("NONE")
+
+  RADIO    	rb_pleft  	200 	@    	@    	.,			/*
+		*/ label("Left tail")	/*
+		*/ option("left")
+
+  RADIO    	rb_pright 	350 	@    	@    	.,			/*
+		*/ last /*	
+		*/ label("Right tail")	/*
+		*/ option("right")
+		
+		
+END
+
+
+DIALOG opt,  tabtitle("Options")
+BEGIN
+
+
+  TEXT   	tx_stratvar	10		10   	200     .,			/*
+		*/ label("Permute within strata")			
+		
+  VARLIST  	vn_stratavar @    	+20		200     .,			/*
+		*/ label("Strata")	/*
+		*/ option("strata")	
+
+		
+		
+	    CHECKBOX 	ck_null 	10		70		480		110,	/*
+			*/ label("Test non-zero null values") /*
+			*/ groupbox /*
+			*/ onclickoff(script nulloff) /*
+			*/ onclickon(script nullon)  
+	  
+  TEXT 		tx_nullwarn1 20		90		460		.,/*
+		*/ label("Warning: Only use this option if you are using cluster " /*
+			*/ "summaries or a continuous outcome variable")
+ 
+  TEXT 		tx_nullwarn2 @		110		@		.,/*
+		*/ label("Specify null values on the same scale as the outcome")
+
+  TEXT 		tx_nulllist	20		130		100		., /*
+		*/ label("Null values to test") 
+
+  EDIT		ed_nulllist	@		150		100		., /*
+		*/ label("Nulllist") /*
+		*/ option("null")
+		
+  TEXT 		tx_nullvar	250		130		100		., /*
+		*/ label("Outcome variable") 
+
+  VARNAME	vn_nullvar	@		150		100		., /*
+		*/ label("Nullvar") /*
+		*/ option("outcome")
+		
+		
+	    CHECKBOX 	ck_saving 	10		200		480		130,	/*
+			*/ label("Save results to file") /*
+			*/ groupbox /*
+			*/ onclickoff(script saveoff) /*
+			*/ onclickon(script saveon)  
+  
+
+  TEXT   	tx_sav		20		220   	100     .,			/*
+	*/ label("Filename:")			/*
+	*/
+  FILE		fl_sav		@		240		460 	., /*
+		*/ label("Browse...") /*
+		*/ defext(dta) /*
+		*/ save /*
+		*/ filter("Stata Data|*.dta") /*
+		*/ option("saving")
+		
+  CHECKBOX 	ck_savd		@		270		250		.,/*
+		*/ label("Save statistics in double precision") /*
+		*/ option("double")
+		
+  SPINNER 	sp_savev	@		300		50		.,/*
+		*/ label("Save every spinner") /*
+		*/ min(1) /*
+		*/ max(10000) /*
+		*/ default(1) /*
+		*/ option("every")
+		
+  TEXT 		tx_savev	100		@		300		.,/*
+		*/ label("Save results to file every #th permutations") 
+
+  
+  
+END
+
+DIALOG withinperiod,  tabtitle("Within-Period")
+BEGIN
+
+  CHECKBOX 	ck_within 	10		10		480		120,	/*
+		*/ label("Within-period analysis") /*
+		*/ groupbox /*
+		*/ option("withinperiod") /*
+		*/ onclickoff(script withinoff) /*
+		*/ onclickon(script withinon) 
+
+  TEXT		tx_pwgt		30		30		100		., /*
+		*/ label("Period Weight") 
+  
+  RADIO		rb_wnone	30		50		100		., /*
+		*/ label("None") /*
+		*/ first /*
+		*/ option("weightperiod")
+  
+  RADIO		rb_wn		30		70		100		., /*
+		*/ label("N")   /*
+		*/ middle /*
+		*/ option("weightperiod")
+ 
+  RADIO		rb_wvar		30		90		100		., /*
+		*/ label("Variance")   /*
+		*/ last /*
+		*/ onclickon(program varon) /*
+		*/ onclickoff(script varoff)
+		
+  TEXT 		tx_wvarstat 	150		@		100		., /*
+		*/ label("Statistic:")
+		
+  EDIT 		ed_wvarstat 	200		@		100		., /*
+		*/ label("statistic") 
+
+END
+
+DIALOG rpt,  tabtitle("Reporting")
+BEGIN
+		
+	COMBOBOX cb_level	10		10		40		., /*
+		*/ label("ci") /*
+		*/ option("level") /*
+		*/ dropdown /*
+		*/ default(c(level)) /*
+		*/ contents(level)
+		
+	TEXT 	tx_level	60		@		100		., /*
+		*/label("Confidence level")
+	
+	CHECKBOX ck_dots	10		40		200		., /*
+		*/ label("Suppress permutation dots") /*
+		*/option("nodots")
+		
+END
+
+DIALOG adv,  tabtitle("Advanced")
+BEGIN
+	
+
+	TEXT 	tx_seed		10		10		150		., /*
+		*/ label("Random number seed:")
+		
+	EDIT	ed_seed		10		30		120		., /*
+		*/ label("seed") /*
+		*/ option("seed")
+		
+END
+
+
+SCRIPT nulloff
+BEGIN
+	opt.tx_nulllist.disable
+	opt.ed_nulllist.disable
+	opt.tx_nullvar.disable
+	opt.vn_nullvar.disable
+END
+
+SCRIPT nullon
+BEGIN
+	opt.tx_nulllist.enable
+	opt.ed_nulllist.enable
+	opt.tx_nullvar.enable
+	opt.vn_nullvar.enable
+END
+
+SCRIPT saveoff
+BEGIN
+	opt.tx_sav.disable
+	opt.fl_sav.disable
+	opt.ck_savd.disable
+	opt.sp_savev.disable
+	opt.tx_savev.disable
+END
+
+SCRIPT saveon
+BEGIN
+	opt.tx_sav.enable
+	opt.fl_sav.enable
+	opt.ck_savd.enable
+	opt.sp_savev.enable
+	opt.tx_savev.enable
+END
+
+SCRIPT withinoff
+BEGIN
+	withinperiod.tx_pwgt.disable
+	withinperiod.rb_wnone.disable
+	withinperiod.rb_wn.disable
+	withinperiod.rb_wvar.disable
+	withinperiod.tx_wvarstat.disable
+	withinperiod.ed_wvarstat.disable
+END
+
+SCRIPT withinon
+BEGIN
+	withinperiod.tx_pwgt.enable
+	withinperiod.rb_wnone.enable
+	withinperiod.rb_wn.enable
+	withinperiod.rb_wvar.enable
+	program varon
+END
+
+
+SCRIPT varoff
+BEGIN
+	withinperiod.tx_wvarstat.disable
+	withinperiod.ed_wvarstat.disable
+END
+
+PROGRAM varon
+BEGIN
+	if withinperiod.ck_within & withinperiod.rb_wvar {
+		call withinperiod.tx_wvarstat.enable
+		call withinperiod.ed_wvarstat.enable
+	}
+	else {
+		call script varoff	
+	}
+END
+
+
+LIST level
+BEGIN
+	99.9
+	99.5
+	99
+	97.5
+	95
+	90
+	80
+	
+END
+
+PROGRAM command
+BEGIN
+	put "swpermute "
+	put main.ed_stat
+	beginoptions
+		optionarg main.vn_clusvar
+		optionarg main.vn_pervar
+		optionarg main.vn_intvar
+		
+		optionarg main.sp_reps
+		option radio(main rb_ptwo rb_pleft rb_pright)
+
+		optionarg opt.vn_stratavar
+	
+		if opt.ck_saving {
+			require opt.fl_sav
+			repfile opt.fl_sav
+			put `"saving( "'
+			put opt.fl_sav
+			put `", "'
+			optionarg opt.sp_savev
+			option opt.ck_savd
+			put "replace) "
+		}		
+		
+		if opt.ck_null {
+			require opt.ed_nulllist
+			require opt.vn_nullvar
+			
+			optionarg opt.ed_nulllist
+			optionarg opt.vn_nullvar
+		}
+		
+		if withinperiod.ck_within {
+			put "withinperiod "
+			if withinperiod.rb_wnone {
+				put "weightperiod(none) "
+			}
+			if withinperiod.rb_wn {
+				put "weightperiod(N) "
+			}
+			if withinperiod.rb_wvar {
+				require withinperiod.ed_wvarstat
+				put `"weightperiod(variance "'
+				put withinperiod.ed_wvarstat
+				put `")"'
+			}
+		}
+		
+		optionarg /hidedefault rpt.cb_level
+		option rpt.ck_dots
+		
+		optionarg adv.ed_seed
+		
+		put ": "
+		put main.ed_cmd
+	endoptions
+END
+
+
