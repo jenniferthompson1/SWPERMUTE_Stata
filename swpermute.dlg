@@ -1,12 +1,13 @@
 /*
-  swpermute
 
-*! VERSION 0.1  16Feb2017
+*! swpermute dialog version 1.1,  08 May 2019, J. A. Thompson jennifer.thompson@lshtm.ac.uk
+*!     for swpermute version 1.1, 08 May 2019, J. A. Thompson jennifer.thompson@lshtm.ac.uk
 
-swtpermute.dlg
-for swtpermute.ado
-with helpfile swtpermute.hlp
-Author: Jennifer Thompson
+swpermute.dlg
+for swpermute.ado
+with helpfile swpermute.hlp
+Author: Jennifer A Thompson
+
 To install  in User Statistics menue via STATA commends:
 
 
@@ -29,10 +30,10 @@ HELP hlp1,   view("help swpermute")
 RESET res1
 COPY copy1
 
-POSITION . . 500 340
+POSITION . . 500 380
 
 
-DIALOG main, label("swpermute- permutation tests for stepped-wedge trials") tabtitle("Main")
+DIALOG main, label("swpermute 1.1 - permutation tests for stepped wedge trials") tabtitle("Main")
 BEGIN
 
 		
@@ -55,7 +56,7 @@ BEGIN
 	
 		GROUPBOX designbox 10 110 480 120, label("Permutations")
 	
-  TEXT   	tx_clusvar  20		130   	120     .,			/*
+  TEXT   	tx_clusvar  20		130   	140     .,			/*
 		*/ label("Cluster")			/*
 		*/
   VARNAME  	vn_clusvar 	@    	150   	@     .,			/*
@@ -103,8 +104,7 @@ BEGIN
 		*/ last /*	
 		*/ label("Right tail")	/*
 		*/ option("right")
-		
-		
+			
 END
 
 
@@ -112,7 +112,14 @@ DIALOG opt,  tabtitle("Options")
 BEGIN
 
 
-  TEXT   	tx_stratvar	10		10   	200     .,			/*
+	TEXT 	tx_seed		10		10		150		., /*
+		*/ label("Random number seed:")
+		
+	EDIT	ed_seed		10		+20		120		., /*
+		*/ label("seed") /*
+		*/ option("seed")	
+
+  TEXT   	tx_stratvar	10		+25   	200     .,			/*
 		*/ label("Permute within strata")			
 		
   VARLIST  	vn_stratavar @    	+20		200     .,			/*
@@ -121,56 +128,56 @@ BEGIN
 
 		
 		
-	    CHECKBOX 	ck_null 	10		70		480		110,	/*
+	    CHECKBOX 	ck_null 	10		+35		480		110,	/*
 			*/ label("Test non-zero null values") /*
 			*/ groupbox /*
 			*/ onclickoff(script nulloff) /*
 			*/ onclickon(script nullon)  
 	  
-  TEXT 		tx_nullwarn1 20		90		460		.,/*
+  TEXT 		tx_nullwarn1 20		+20		460		.,/*
 		*/ label("Warning: Only use this option if you are using cluster " /*
 			*/ "summaries or a continuous outcome variable")
  
-  TEXT 		tx_nullwarn2 @		110		@		.,/*
+  TEXT 		tx_nullwarn2 @		+20		@		.,/*
 		*/ label("Specify null values on the same scale as the outcome")
 
-  TEXT 		tx_nulllist	20		130		100		., /*
+  TEXT 		tx_nulllist	20		170		100		., /*
 		*/ label("Null values to test") 
 
-  EDIT		ed_nulllist	@		150		100		., /*
+  EDIT		ed_nulllist	@		190		140		., /*
 		*/ label("Nulllist") /*
 		*/ option("null")
 		
-  TEXT 		tx_nullvar	250		130		100		., /*
+  TEXT 		tx_nullvar	250		170		100		., /*
 		*/ label("Outcome variable") 
 
-  VARNAME	vn_nullvar	@		150		100		., /*
+  VARNAME	vn_nullvar	@		190		140		., /*
 		*/ label("Nullvar") /*
 		*/ option("outcome")
 		
 		
-	    CHECKBOX 	ck_saving 	10		200		480		130,	/*
+	    CHECKBOX 	ck_saving 	10		230		480		130,	/*
 			*/ label("Save results to file") /*
 			*/ groupbox /*
 			*/ onclickoff(script saveoff) /*
 			*/ onclickon(script saveon)  
   
 
-  TEXT   	tx_sav		20		220   	100     .,			/*
+  TEXT   	tx_sav		20		+20   	100     .,			/*
 	*/ label("Filename:")			/*
 	*/
-  FILE		fl_sav		@		240		460 	., /*
+  FILE		fl_sav		@		+20		460 	., /*
 		*/ label("Browse...") /*
 		*/ defext(dta) /*
 		*/ save /*
 		*/ filter("Stata Data|*.dta") /*
 		*/ option("saving")
 		
-  CHECKBOX 	ck_savd		@		270		250		.,/*
+  CHECKBOX 	ck_savd		@		+30		250		.,/*
 		*/ label("Save statistics in double precision") /*
 		*/ option("double")
 		
-  SPINNER 	sp_savev	@		300		50		.,/*
+  SPINNER 	sp_savev	@		+30		50		.,/*
 		*/ label("Save every spinner") /*
 		*/ min(1) /*
 		*/ max(10000) /*
@@ -184,15 +191,15 @@ BEGIN
   
 END
 
-DIALOG withinperiod,  tabtitle("Within-Period")
+DIALOG withinperiodandrpt,  tabtitle("Within-Period and Reporting")
 BEGIN
 
-  CHECKBOX 	ck_within 	10		10		480		120,	/*
-		*/ label("Within-period analysis") /*
-		*/ groupbox /*
-		*/ option("withinperiod") /*
-		*/ onclickoff(script withinoff) /*
-		*/ onclickon(script withinon) 
+		CHECKBOX 	ck_within 	10		10		480		120,	/*
+			*/ label("Within-period analysis") /*
+			*/ groupbox /*
+			*/ option("withinperiod") /*
+			*/ onclickoff(script withinoff) /*
+			*/ onclickon(script withinon) 
 
   TEXT		tx_pwgt		30		30		100		., /*
 		*/ label("Period Weight") 
@@ -219,37 +226,21 @@ BEGIN
   EDIT 		ed_wvarstat 	200		@		100		., /*
 		*/ label("statistic") 
 
-END
-
-DIALOG rpt,  tabtitle("Reporting")
-BEGIN
-		
-	COMBOBOX cb_level	10		10		40		., /*
+		GROUPBOX pbox 10 140 480 80, label("Reporting")
+			
+  COMBOBOX cb_level	20		160		60		., /*
 		*/ label("ci") /*
 		*/ option("level") /*
 		*/ dropdown /*
 		*/ default(c(level)) /*
 		*/ contents(level)
-		
-	TEXT 	tx_level	60		@		100		., /*
+
+	TEXT 	tx_level	90		@		100		., /*
 		*/label("Confidence level")
 	
-	CHECKBOX ck_dots	10		40		200		., /*
+	CHECKBOX ck_dots	20		+30		200		., /*
 		*/ label("Suppress permutation dots") /*
 		*/option("nodots")
-		
-END
-
-DIALOG adv,  tabtitle("Advanced")
-BEGIN
-	
-
-	TEXT 	tx_seed		10		10		150		., /*
-		*/ label("Random number seed:")
-		
-	EDIT	ed_seed		10		30		120		., /*
-		*/ label("seed") /*
-		*/ option("seed")
 		
 END
 
@@ -290,35 +281,35 @@ END
 
 SCRIPT withinoff
 BEGIN
-	withinperiod.tx_pwgt.disable
-	withinperiod.rb_wnone.disable
-	withinperiod.rb_wn.disable
-	withinperiod.rb_wvar.disable
-	withinperiod.tx_wvarstat.disable
-	withinperiod.ed_wvarstat.disable
+	withinperiodandrpt.tx_pwgt.disable
+	withinperiodandrpt.rb_wnone.disable
+	withinperiodandrpt.rb_wn.disable
+	withinperiodandrpt.rb_wvar.disable
+	withinperiodandrpt.tx_wvarstat.disable
+	withinperiodandrpt.ed_wvarstat.disable
 END
 
 SCRIPT withinon
 BEGIN
-	withinperiod.tx_pwgt.enable
-	withinperiod.rb_wnone.enable
-	withinperiod.rb_wn.enable
-	withinperiod.rb_wvar.enable
+	withinperiodandrpt.tx_pwgt.enable
+	withinperiodandrpt.rb_wnone.enable
+	withinperiodandrpt.rb_wn.enable
+	withinperiodandrpt.rb_wvar.enable
 	program varon
 END
 
 
 SCRIPT varoff
 BEGIN
-	withinperiod.tx_wvarstat.disable
-	withinperiod.ed_wvarstat.disable
+	withinperiodandrpt.tx_wvarstat.disable
+	withinperiodandrpt.ed_wvarstat.disable
 END
 
 PROGRAM varon
 BEGIN
-	if withinperiod.ck_within & withinperiod.rb_wvar {
-		call withinperiod.tx_wvarstat.enable
-		call withinperiod.ed_wvarstat.enable
+	if withinperiodandrpt.ck_within & withinperiodandrpt.rb_wvar {
+		call withinperiodandrpt.tx_wvarstat.enable
+		call withinperiodandrpt.ed_wvarstat.enable
 	}
 	else {
 		call script varoff	
@@ -370,27 +361,28 @@ BEGIN
 			optionarg opt.ed_nulllist
 			optionarg opt.vn_nullvar
 		}
-		
-		if withinperiod.ck_within {
+
+		optionarg opt.ed_seed
+
+		if withinperiodandrpt.ck_within {
 			put "withinperiod "
-			if withinperiod.rb_wnone {
+			if withinperiodandrpt.rb_wnone {
 				put "weightperiod(none) "
 			}
-			if withinperiod.rb_wn {
+			if withinperiodandrpt.rb_wn {
 				put "weightperiod(N) "
 			}
-			if withinperiod.rb_wvar {
-				require withinperiod.ed_wvarstat
+			if withinperiodandrpt.rb_wvar {
+				require withinperiodandrpt.ed_wvarstat
 				put `"weightperiod(variance "'
-				put withinperiod.ed_wvarstat
+				put withinperiodandrpt.ed_wvarstat
 				put `")"'
 			}
 		}
 		
-		optionarg /hidedefault rpt.cb_level
-		option rpt.ck_dots
+		optionarg /hidedefault withinperiodandrpt.cb_level
+		option withinperiodandrpt.ck_dots
 		
-		optionarg adv.ed_seed
 		
 		put ": "
 		put main.ed_cmd

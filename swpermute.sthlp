@@ -48,7 +48,7 @@ trial{p_end}
 {p2coldent :* {opth int:ervention(varname)}}variable defining the intervention 
 conditions. This 
 must be a binary variable{p_end}
-{synopt :{opt r:eps(#)}}perform {it:#} random permutations; default is {opt reps(500)}{p_end}
+{synopt :{opt r:eps(#)}}perform {it:#} random permutations; default is {opt reps(1000)}{p_end}
 {synopt :{opt lef:t}|{opt rig:ht}}compute one-sided p-values; default is two-sided{p_end}
 
 {syntab :Options}

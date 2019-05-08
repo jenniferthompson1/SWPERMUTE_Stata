@@ -1,4 +1,4 @@
-*! version 1.0 11Feb2019
+*! version 1.1 08May2019
 
 prog define swpermute, rclass
 version 13.0
@@ -19,11 +19,7 @@ Data should be in long format with a row for each cluster at each period. 	There
 Using matrices for the estimation so is limited to 400 periods
 
 UPDATES:
-- Weights changed to sum up to one
-- p value calculation- removed adding one to include the observed dataset because it hasn't been randomly selected
-- Seed reset to the same start value for each null value
-- printed design corrected to keep correct numerical order
-- Allow variance to be abbreviated to var in weightperiod
+- default number of repetitions increased from 500 to 1000
 */
 
 
@@ -68,7 +64,7 @@ syntax anything , CLuster(varname)
 					PERiod(varname)
 					INTervention(varname)
 					[nodots] 
-					[Reps(integer 500)] 
+					[Reps(integer 1000)] 
 					[seed(string)]
 					[STRata(varlist)]
 					[WIthinperiod]
