@@ -1,6 +1,8 @@
- adopath + "H:\My Documents\PhD\Stata_command\progs"
+ adopath + "H:\My Documents\Stepped Wedge Trials\PhD\Stata_swpermute\Code"
 
-  global ProgDir "H:\My Documents\PhD\Stata_command\progs"
+ adopath + "C:\Users\lsh304314\Filr\My Files\My Documents\Stepped Wedge Trials\PhD\Stata_swpermute\Code"
+ 
+  global ProgDir "H:\My Documents\Stepped Wedge Trials\PhD\Stata_swpermute\Code"
 
  
  global DataDir "H:\My Documents\Data\XpertMTBRIF\Mar2017"
